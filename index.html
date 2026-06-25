@@ -9,7 +9,11 @@
     postH();
   }
   btns.forEach(function(b){ b.addEventListener('click',function(){ show(b.getAttribute('data-tab')); }); });
-  show('1');
+  var only=new URLSearchParams(location.search).get('tab');
+  if(only && ['1','2','3','4'].indexOf(only)>=0){
+    var ts=document.querySelector('.tabsec'); if(ts) ts.style.display='none';
+    show(only);
+  } else { show('1'); }
   window.addEventListener('load', postH);
   window.addEventListener('resize', postH);
   var im=document.images; for(var i=0;i<im.length;i++){ im[i].addEventListener('load', postH); }
