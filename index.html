@@ -2,12 +2,18 @@
 (function(){
   var btns=document.querySelectorAll('.tab-button');
   var panels=document.querySelectorAll('.lp-panel');
+  function postH(){ try{ parent.postMessage({otm:'h', height: document.documentElement.scrollHeight}, '*'); }catch(e){} }
   function show(t){
     btns.forEach(function(b){b.classList.toggle('active', b.getAttribute('data-tab')===t);});
     panels.forEach(function(p){p.classList.toggle('active', p.id==='panel-'+t);});
+    postH();
   }
   btns.forEach(function(b){ b.addEventListener('click',function(){ show(b.getAttribute('data-tab')); }); });
   show('1');
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  var im=document.images; for(var i=0;i<im.length;i++){ im[i].addEventListener('load', postH); }
+  setTimeout(postH,800); setTimeout(postH,2000);
 })();
 function scrollToForm(subject){ try{ window.parent.postMessage({type:'otm-scroll-to-form',subject:subject},'*'); }catch(e){} }
 </script></body></html>
