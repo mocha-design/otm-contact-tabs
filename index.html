@@ -3,9 +3,12 @@
   var btns=document.querySelectorAll('.tab-button');
   var panels=document.querySelectorAll('.lp-panel');
   function postH(){ try{ parent.postMessage({otm:'h', height: document.documentElement.scrollHeight}, '*'); }catch(e){} }
+  var statsDone=false;
+  function runStats(){ if(statsDone)return; statsDone=true; document.querySelectorAll('.p4-stat-val[data-target]').forEach(function(el){ var t=parseInt(el.getAttribute('data-target'),10)||0,st=null; function step(ts){ if(!st)st=ts; var p=Math.min((ts-st)/900,1); el.textContent=Math.round(t*p); if(p<1)requestAnimationFrame(step);} requestAnimationFrame(step); }); }
   function show(t){
     btns.forEach(function(b){b.classList.toggle('active', b.getAttribute('data-tab')===t);});
     panels.forEach(function(p){p.classList.toggle('active', p.id==='panel-'+t);});
+    if(t==='4') runStats();
     postH();
   }
   btns.forEach(function(b){ b.addEventListener('click',function(){ show(b.getAttribute('data-tab')); }); });
