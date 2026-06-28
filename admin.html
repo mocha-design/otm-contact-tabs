@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OTM コンテンツ管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0D1B2A;--navy-mid:#1B2D45;--steel:#415A77;
+  --gold:#C8A960;--gold-light:#D4BA7A;--warm-white:#FAF8F5;
+  --danger:#c0392b;--success:#27ae60;--warn:#e67e22;
+  --bg:#f2f0ed;--border:#ddd8d0;--text:#1a1a18;--muted:#888
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-card{background:#fff;border-radius:12px;padding:48px 40px;max-width:440px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.1)}
+.auth-logo{margin-bottom:32px;text-align:center}
+.auth-logo-label{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
+.auth-logo-title{font-size:22px;font-weight:700;color:var(--navy)}
+.auth-logo-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.auth-note{background:#fdf9f0;border:1px solid rgba(200,169,96,.3);border-radius:6px;padding:14px 16px;margin-bottom:24px;font-size:12px;color:#666;line-height:1.7}
+.auth-note code{background:#ede8df;padding:1px 5px;border-radius:3px;font-family:'Inter',monospace;font-size:11px;color:var(--navy)}
+label{display:block;font-size:12px;font-weight:700;color:var(--steel);margin-bottom:6px;letter-spacing:.04em}
+input[type=text],input[type=password],input[type=date],select,textarea{
+  width:100%;border:1px solid var(--border);border-radius:6px;padding:10px 14px;
+  font-size:14px;font-family:'Noto Sans JP',sans-serif;color:var(--text);
+  background:#fff;outline:none;transition:border .15s
+}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:6px;padding:10px 20px;font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy-mid)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{opacity:.85}
+.btn-ghost{background:transparent;color:var(--steel);border:1px solid var(--border)}
+.btn-ghost:hover{background:#f5f3f0}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.form-group{margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px}
+#app{display:none;flex-direction:column;min-height:100vh}
+.app-header{background:var(--navy);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-header-left{display:flex;align-items:center;gap:12px}
+.app-header-logo{font-size:13px;font-weight:700;letter-spacing:.04em}
+.app-header-sub{font-size:11px;color:rgba(255,255,255,.5);font-family:'Inter',sans-serif}
+.header-sep{width:1px;height:20px;background:rgba(255,255,255,.15)}
+.app-header-right{display:flex;align-items:center;gap:8px}
+.header-token-info{font-size:11px;color:rgba(255,255,255,.5);font-family:'Inter',sans-serif}
+.tab-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex}
+.tab-btn{padding:14px 24px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:all .15s;font-family:'Noto Sans JP',sans-serif}
+.tab-btn.active{color:var(--navy);border-bottom-color:var(--gold)}
+.tab-btn .count{display:inline-block;background:#eee;color:#666;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:6px;font-family:'Inter',sans-serif;font-weight:600}
+.tab-btn.active .count{background:rgba(200,169,96,.15);color:var(--gold)}
+.content{padding:24px;flex:1}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:15px;font-weight:700;color:var(--navy)}
+.section-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.table-wrap{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--navy);color:#fff;padding:12px 14px;font-size:11px;font-weight:700;text-align:left;letter-spacing:.04em;white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid #f0ece7;font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fdf9f5}
+.slug-cell{font-family:'Inter',monospace;font-size:11px;color:var(--steel)}
+.cat-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;background:rgba(65,90,119,.1);color:var(--steel)}
+.pub-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700}
+.pub-badge.on{background:rgba(39,174,96,.12);color:var(--success)}
+.pub-badge.off{background:rgba(136,136,136,.1);color:#aaa}
+.actions{display:flex;gap:6px;white-space:nowrap}
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:640px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:700;color:var(--navy)}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;padding:4px}
+.modal-body{padding:24px;max-height:70vh;overflow-y:auto}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.section-label{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(200,169,96,.2)}
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.15);animation:slideIn .2s ease;display:flex;align-items:center;gap:8px}
+.toast.success{background:var(--success);color:#fff}
+.toast.error{background:var(--danger);color:#fff}
+.toast.info{background:var(--navy);color:#fff}
+@keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.loading-overlay.active{display:flex}
+.loading-text{font-size:14px;font-weight:600;color:var(--navy)}
+.checkbox-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.checkbox-wrap input[type=checkbox]{width:16px;height:16px;accent-color:var(--navy);cursor:pointer}
+.checkbox-wrap span{font-size:13px;color:var(--text)}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:24px}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#fff;border-radius:12px;padding:28px;max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.confirm-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.confirm-msg{font-size:13px;color:#555;line-height:1.6;margin-bottom:20px}
+.confirm-actions{display:flex;gap:8px;justify-content:flex-end}
+@media(max-width:700px){.form-row{grid-template-columns:1fr}.content{padding:16px}.tab-btn{padding:12px 14px;font-size:12px}}
+</style>
+</head>
+<body>
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-label">Office T&amp;M</div>
+      <div class="auth-logo-title">コンテンツ管理システム</div>
+      <div class="auth-logo-sub">物件・ニュース・コラムの管理</div>
+    </div>
+    <div class="auth-note">
+      <strong>ご利用前に</strong><br>
+      GitHubの Personal Access Token（PAT）が必要です。<br>
+      取得方法：GitHub → Settings → Developer settings → Personal access tokens → Generate new token<br>
+      必要な権限：<code>repo</code>（Contents: Read &amp; Write）
+    </div>
+    <div class="form-group">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxx">
+      <div class="form-hint">入力されたトークンはこのブラウザのみに保存され、外部には送信されません</div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">ログインして管理を始める</button>
+    <p id="auth-error" style="color:var(--danger);font-size:12px;margin-top:12px;display:none"></p>
+  </div>
+</div>
+<div id="app">
+  <div class="app-header">
+    <div class="app-header-left">
+      <div>
+        <div class="app-header-logo">Office T&amp;M CMS</div>
+        <div class="app-header-sub">コンテンツ管理システム</div>
+      </div>
+      <div class="header-sep"></div>
+      <div class="header-token-info" id="token-info"></div>
+    </div>
+    <div class="app-header-right">
+      <button class="btn btn-ghost btn-sm" onclick="openSettings()" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)">⚙ 設定</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)">ログアウト</button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('property')" id="tab-property">物件 <span class="count" id="cnt-property">0</span></button>
+    <button class="tab-btn" onclick="switchTab('news')" id="tab-news">ニュース <span class="count" id="cnt-news">0</span></button>
+    <button class="tab-btn" onclick="switchTab('column')" id="tab-column">コラム <span class="count" id="cnt-column">0</span></button>
+  </div>
+  <div class="content">
+    <div id="pane-property">
+      <div class="section-header">
+        <div><div class="section-title">物件管理</div><div class="section-desc">物件情報の追加・編集・削除</div></div>
+        <button class="btn btn-primary" onclick="openModal('property',null)">＋ 物件を追加</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>No.</th><th>タイトル</th><th>カテゴリー</th><th>価格</th><th>公開</th><th>操作</th></tr></thead><tbody id="property-tbody"></tbody></table></div>
+    </div>
+    <div id="pane-news" style="display:none">
+      <div class="section-header">
+        <div><div class="section-title">ニュース管理</div><div class="section-desc">お知らせ・土地情報の追加・編集・削除</div></div>
+        <button class="btn btn-primary" onclick="openModal('news',null)">＋ ニュースを追加</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>日付</th><th>タイトル</th><th>カテゴリー</th><th>公開</th><th>操作</th></tr></thead><tbody id="news-tbody"></tbody></table></div>
+    </div>
+    <div id="pane-column" style="display:none">
+      <div class="section-header">
+        <div><div class="section-title">コラム管理</div><div class="section-desc">お役立ち情報の追加・編集・削除</div></div>
+        <button class="btn btn-primary" onclick="openModal('column',null)">＋ コラムを追加</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>日付</th><th>タイトル</th><th>カテゴリー</th><th>公開</th><th>操作</th></tr></thead><tbody id="column-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modal-title">追加</div><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()"><span id="save-spinner" class="spinner" style="display:none"></span>保存する</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header"><div class="modal-title">設定</div><button class="modal-close" onclick="closeSettings()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="new-pat-input" placeholder="ghp_xxxxxxxxxxxxxxxx">
+        <div class="form-hint">新しいトークンを入力して「更新」を押してください</div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="section-label">キャッシュパージ</div>
+        <p style="font-size:12px;color:#555;margin-bottom:12px">JSONファイルを更新した後、CDNキャッシュを手動でクリアする場合は下のボタンを押してください。</p>
+        <button class="btn btn-ghost btn-sm" onclick="manualPurge()">CDNキャッシュをクリア</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSettings()">閃じる</button>
+      <button class="btn btn-primary" onclick="updateToken()">トークンを更新</button>
+    </div>
+  </div>
+</div>
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">確認</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="confirmReject()">キャンセル</button>
+      <button class="btn btn-danger" onclick="confirmAccept()">削除する</button>
+    </div>
+  </div>
+</div>
+<div class="loading-overlay" id="loading-overlay">
+  <div style="width:40px;height:40px;border:3px solid rgba(13,27,42,.15);border-top-color:var(--navy);border-radius:50%;animation:spin .6s linear infinite"></div>
+  <div class="loading-text" id="loading-text">処理中...</div>
+</div>
+<div class="toast-wrap" id="toast-wrap"></div>
+<script>
+const OWNER='mocha-design',REPO='otm-contact-tabs',BRANCH='main';
+const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+const PURGE=`https://purge.jsdelivr.net/gh/${OWNER}/${REPO}@${BRANCH}`;
+const FILES={property:'data/property_data.json',news:'data/news_data.json',column:'data/column_data.json'};
+let PAT='',data={property:null,news:null,column:null},sha={property:'',news:'',column:''};
+let currentTab='property',modalTab='',modalSlug=null,confirmCb=null;
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('otm_pat');
+  if(saved){PAT=saved;showApp();}
+});
+async function doLogin(){
+  const input=document.getElementById('pat-input').value.trim();
+  if(!input){showAuthError('トークンを入力してください');return;}
+  setLoading(true,'トークンを確認中...');
+  try{
+    const ok=await verifyToken(input);
+    if(!ok){showAuthError('トークンが無効です。権限（repo）を確認してください');return;}
+    PAT=input;localStorage.setItem('otm_pat',PAT);showApp();
+  }catch(e){showAuthError('接続エラー: '+e.message);}
+  finally{setLoading(false);}
+}
+async function verifyToken(token){
+  const r=await fetch(`${API}/${FILES.property}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}});
+  return r.status===200||r.status===404;
+}
+function showAuthError(msg){
+  const el=document.getElementById('auth-error');el.textContent=msg;el.style.display='block';
+}
+function doLogout(){
+  localStorage.removeItem('otm_pat');PAT='';data={property:null,news:null,column:null};
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+async function showApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('token-info').textContent='Token: '+PAT.slice(0,4)+'...'+PAT.slice(-4);
+  setLoading(true,'データを読み込み中...');
+  await Promise.all([loadData('property'),loadData('news'),loadData('column')]);
+  setLoading(false);renderAll();
+}
+async function loadData(tab){
+  try{
+    const r=await fetch(`${API}/${FILES[tab]}`,{headers:{Authorization:`Bearer ${PAT}`,Accept:'application/vnd.github+json'}});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const json=await r.json();
+    sha[tab]=json.sha;
+    data[tab]=JSON.parse(atob(json.content.replace(/\n/g,'')));
+  }catch(e){
+    showToast(`${tab}データの読み込みに失敗: `+e.message,'error');
+    data[tab]={version:'1.0',updatedAt:today(),items:[]};sha[tab]='';
+  }
+}
+function switchTab(tab){
+  ['property','news','column'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('pane-'+t).style.display=t===tab?'block':'none';
+  });currentTab=tab;
+}
+function renderAll(){renderPropertyTable();renderNewsTable();renderColumnTable();}
+function renderPropertyTable(){
+  const items=data.property?.items||[];
+  document.getElementById('cnt-property').textContent=items.length;
+  const tbody=document.getElementById('property-tbody');
+  if(!items.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty-state">物件データがありません</div></td></tr>';return;}
+  tbody.innerHTML=items.map(it=>`<tr>
+    <td><span class="slug-cell">${esc(it.num||it.slug)}</span></td>
+    <td style="max-width:220px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div></td>
+    <td><span class="cat-badge">${esc(it.category)}</span></td>
+    <td>${esc(it.price)}</td>
+    <td><span class="pub-badge ${it.published?'on':'off'}">${it.published?'公開':'非公開'}</span></td>
+    <td class="actions">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('property','${esc(it.slug)}')"> 編集</button>
+      <button class="btn btn-sm" style="background:rgba(192,57,43,.1);color:var(--danger);border:1px solid rgba(192,57,43,.2)" onclick="confirmDelete('property','${esc(it.slug)}','${esc(it.title)}')"> 削除</button>
+    </td></tr>`).join('');
+}
+function renderNewsTable(){
+  const items=data.news?.items||[];
+  document.getElementById('cnt-news').textContent=items.length;
+  const tbody=document.getElementById('news-tbody');
+  if(!items.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state">ニュースデータがありません</div></td></tr>';return;}
+  tbody.innerHTML=items.map(it=>`<tr>
+    <td style="white-space:nowrap;font-family:Inter,monospace;font-size:12px">${esc(it.date)}</td>
+    <td style="max-width:260px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div></td>
+    <td><span class="cat-badge">${esc(it.category)}</span></td>
+    <td><span class="pub-badge ${it.published?'on':'off'}">${it.published?'公開':'非公開'}</span></td>
+    <td class="actions">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('news','${esc(it.slug)}')"> 編集</button>
+      <button class="btn btn-sm" style="background:rgba(192,57,43,.1);color:var(--danger);border:1px solid rgba(192,57,43,.2)" onclick="confirmDelete('news','${esc(it.slug)}','${esc(it.title)}')"> 削除</button>
+    </td></tr>`).join('');
+}
+function renderColumnTable(){
+  const items=data.column?.items||[];
+  document.getElementById('cnt-column').textContent=items.length;
+  const tbody=document.getElementById('column-tbody');
+  if(!items.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state">コラムデータがありません</div></td></tr>';return;}
+  tbody.innerHTML=items.map(it=>`<tr>
+    <td style="white-space:nowrap;font-family:Inter,monospace;font-size:12px">${esc(it.date)}</td>
+    <td style="max-width:260px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div></td>
+    <td><span class="cat-badge">${esc(it.category)}</span></td>
+    <td><span class="pub-badge ${it.published?'on':'off'}">${it.published?'公開':'非公開'}</span></td>
+    <td class="actions">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('column','${esc(it.slug)}')"> 編集</button>
+      <button class="btn btn-sm" style="background:rgba(192,57,43,.1);color:var(--danger);border:1px solid rgba(192,57,43,.2)" onclick="confirmDelete('column','${esc(it.slug)}','${esc(it.title)}')"> 削除</button>
+    </td></tr>`).join('');
+}
+function openModal(tab,slug){
+  modalTab=tab;modalSlug=slug;
+  const item=slug?data[tab]?.items?.find(i=>i.slug===slug):null;
+  document.getElementById('modal-title').textContent=(slug?'編集：':'追加：')+{property:'物件',news:'ニュース',column:'コラム'}[tab];
+  const body=document.getElementById('modal-body');
+  if(tab==='property') body.innerHTML=buildPropertyForm(item);
+  else if(tab==='news') body.innerHTML=buildNewsForm(item);
+  else body.innerHTML=buildColumnForm(item);
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
+function v(id,def=''){const el=document.getElementById(id);return el?el.value:def;}
+function chk(id){const el=document.getElementById(id);return el?el.checked:false;}
+function buildPropertyForm(it){
+  const f=it||{};
+  return `<div class="section-label">基本情報</div>
+<div class="form-row">
+  <div class="form-group"><label>物件番号</label><input type="text" id="f-num" value="${esc(f.num||'')}" placeholder="TM-007"></div>
+  <div class="form-group"><label>スラッグ (URL用・英数字)</label><input type="text" id="f-slug" value="${esc(f.slug||'')}" placeholder="tm-007"><div class="form-hint">英小文字・数字・ハイフンのみ</div></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label>カテゴリー</label><select id="f-category">${['事業用地','住宅用地','売買物件'].map(c=>`<option${f.category===c?' selected':''}>${c}</option>`).join('')}</select></div>
+  <div class="form-group"><label>価格</label><input type="text" id="f-price" value="${esc(f.price||'')}" placeholder="2,800万円"></div>
+</div>
+<div class="form-group"><label>タイトル</label><input type="text" id="f-title" value="${esc(f.title||'')}" placeholder="宇都宮市○○町 土地 120坪"></div>
+<div class="form-group"><label>一覧表示テキスト (meta)</label><input type="text" id="f-meta" value="${esc(f.meta||'')}" placeholder="No.TM-007 | 面積：396m² | 価格：2,800万円"></div>
+<div class="section-label" style="margin-top:20px">所在地・アクセス</div>
+<div class="form-row">
+  <div class="form-group"><label>住所</label><input type="text" id="f-address" value="${esc(f.address||'')}"></div>
+  <div class="form-group"><label>交通アクセス</label><input type="text" id="f-access" value="${esc(f.access||'')}"></div>
+</div>
+<div class="section-label" style="margin-top:20px">物件詳細</div>
+<div class="form-row">
+  <div class="form-group"><label>面積</label><input type="text" id="f-area" value="${esc(f.area||'')}" placeholder="396.00m²（約120坪）"></div>
+  <div class="form-group"><label>用途地域</label><input type="text" id="f-zone" value="${esc(f.zone||'')}" placeholder="第一種住居地域"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label>建ぺい率/容積率</label><input type="text" id="f-coverage" value="${esc(f.coverage||'')}" placeholder="60% / 200%"></div>
+  <div class="form-group"><label>接道状況</label><input type="text" id="f-road" value="${esc(f.road||'')}" placeholder="南側6m公道"></div>
+</div>
+<div class="form-row">
+  <div class="form-group"><label>設備</label><input type="text" id="f-facilities" value="${esc(f.facilities||'')}"></div>
+  <div class="form-group"><label>引渡し</label><input type="text" id="f-delivery" value="${esc(f.delivery||'')}" placeholder="即時"></div>
+</div>
+<div class="form-group"><label>取引態様</label><input type="text" id="f-transaction" value="${esc(f.transaction||'')}" placeholder="売主"></div>
+<div class="section-label" style="margin-top:20px">特徴（3項目）</div>
+<div class="form-group"><label>特徴①</label><textarea id="f-feat0" rows="2">${esc((f.features||[])[0]||'')}</textarea></div>
+<div class="form-group"><label>特徴②</label><textarea id="f-feat1" rows="2">${esc((f.features||[])[1]||'')}</textarea></div>
+<div class="form-group"><label>特徴③</label><textarea id="f-feat2" rows="2">${esc((f.features||[])[2]||'')}</textarea></div>
+<div class="section-label" style="margin-top:20px">公開設定</div>
+<label class="checkbox-wrap"><input type="checkbox" id="f-published" ${f.published!==false?'checked':''}><span>この物件を公開する</span></label>`;
+}
+function buildNewsForm(it){
+  const f=it||{};
+  return `<div class="section-label">基本情報</div>
+<div class="form-group"><label>スラッグ (URL用・英数字)</label><input type="text" id="f-slug" value="${esc(f.slug||'')}" placeholder="news-title-2026"><div class="form-hint">英小文字・数字・ハイフンのみ</div></div>
+<div class="form-row">
+  <div class="form-group"><label>カテゴリー</label><select id="f-category">${['お知らせ','土地情報'].map(c=>`<option${f.category===c?' selected':''}>${c}</option>`).join('')}</select></div>
+  <div class="form-group"><label>投稿日</label><input type="date" id="f-date" value="${esc(f.date||today())}"></div>
+</div>
+<div class="form-group"><label>タイトル</label><input type="text" id="f-title" value="${esc(f.title||'')}" placeholder="ニュースのタイトルを入力"></div>
+<div class="form-group"><label>本文</label><textarea id="f-body" rows="6">${esc(f.body||'')}</textarea><div class="form-hint">改行は段落として表示されます</div></div>
+<div class="section-label" style="margin-top:20px">公開設定</div>
+<label class="checkbox-wrap"><input type="checkbox" id="f-published" ${f.published!==false?'checked':''}><span>このニュースを公開する</span></label>`;
+}
+function buildColumnForm(it){
+  const f=it||{};
+  return `<div class="section-label">基本情報</div>
+<div class="form-group"><label>スラッグ (URL用・英数字)</label><input type="text" id="f-slug" value="${esc(f.slug||'')}" placeholder="column-title-2026"><div class="form-hint">英小文字・数字・ハイフンのみ</div></div>
+<div class="form-row">
+  <div class="form-group"><label>カテゴリー</label><select id="f-category">${['土地活用','売買','事例','相続'].map(c=>`<option${f.category===c?' selected':''}>${c}</option>`).join('')}</select></div>
+  <div class="form-group"><label>投稿日</label><input type="date" id="f-date" value="${esc(f.date||today())}"></div>
+</div>
+<div class="form-group"><label>タイトル</label><input type="text" id="f-title" value="${esc(f.title||'')}" placeholder="コラムのタイトルを入力"></div>
+<div class="form-group"><label>サマリー（一覧ページに表示）</label><textarea id="f-summary" rows="2">${esc(f.summary||'')}</textarea></div>
+<div class="form-group"><label>本文</label><textarea id="f-body" rows="10">${esc(f.body||'')}</textarea><div class="form-hint">【見出し】と入力すると見出しとして表示されます</div></div>
+<div class="section-label" style="margin-top:20px">公開設定</div>
+<label class="checkbox-wrap"><input type="checkbox" id="f-published" ${f.published!==false?'checked':''}><span>このコラムを公開する</span></label>`;
+}
+async function saveModal(){
+  const slug=v('f-slug').trim(),title=v('f-title').trim();
+  if(!slug){showToast('スラッグを入力してください','error');return;}
+  if(!title){showToast('タイトルを入力してください','error');return;}
+  if(!/^[a-z0-9\-]+$/.test(slug)){showToast('スラッグは英小文字・数字・ハイフンのみ使用できます','error');return;}
+  if(!modalSlug&&data[modalTab]?.items?.some(i=>i.slug===slug)){showToast('同じスラッグがすでに存在します','error');return;}
+  let item;
+  if(modalTab==='property') item={slug,num:v('f-num').trim(),category:v('f-category'),title,price:v('f-price').trim(),address:v('f-address').trim(),access:v('f-access').trim(),area:v('f-area').trim(),zone:v('f-zone').trim(),coverage:v('f-coverage').trim(),road:v('f-road').trim(),facilities:v('f-facilities').trim(),delivery:v('f-delivery').trim(),transaction:v('f-transaction').trim(),meta:v('f-meta').trim(),features:[v('f-feat0').trim(),v('f-feat1').trim(),v('f-feat2').trim()].filter(Boolean),published:chk('f-published')};
+  else if(modalTab==='news') item={slug,title,category:v('f-category'),date:v('f-date').trim()||today(),body:v('f-body').trim(),published:chk('f-published')};
+  else item={slug,title,category:v('f-category'),date:v('f-date').trim()||today(),summary:v('f-summary').trim(),body:v('f-body').trim(),published:chk('f-published')};
+  setSavingState(true);
+  try{
+    const items=data[modalTab].items;
+    if(modalSlug){const idx=items.findIndex(i=>i.slug===modalSlug);if(idx>=0)items[idx]=item;else items.push(item);}
+    else items.unshift(item);
+    data[modalTab].updatedAt=today();
+    await pushJSON(modalTab);
+    renderAll();closeModal();
+    showToast('保存しました！','success');
+  }catch(e){showToast('保存に失敗しました: '+e.message,'error');}
+  finally{setSavingState(false);}
+}
+function confirmDelete(tab,slug,title){
+  document.getElementById('confirm-title').textContent='削除の確認';
+  document.getElementById('confirm-msg').textContent=`「${title}」を削除してよろしいですか？この操作は元に戻せません。`;
+  document.getElementById('confirm-overlay').classList.add('open');
+  confirmCb=async()=>{
+    setLoading(true,'削除中...');
+    try{
+      data[tab].items=data[tab].items.filter(i=>i.slug!==slug);
+      data[tab].updatedAt=today();
+      await pushJSON(tab);renderAll();
+      showToast('削除しました','success');
+    }catch(e){showToast('削除に失敗: '+e.message,'error');}
+    finally{setLoading(false);}
+  };
+}
+function confirmAccept(){document.getElementById('confirm-overlay').classList.remove('open');if(confirmCb){confirmCb();confirmCb=null;}}
+function confirmReject(){document.getElementById('confirm-overlay').classList.remove('open');confirmCb=null;}
+async function pushJSON(tab){
+  const content=JSON.stringify(data[tab],null,2);
+  const encoded=btoa(unescape(encodeURIComponent(content)));
+  const path=FILES[tab];
+  const headR=await fetch(`${API}/${path}`,{headers:{Authorization:`Bearer ${PAT}`,Accept:'application/vnd.github+json'}});
+  if(headR.ok){const j=await headR.json();sha[tab]=j.sha;}
+  const body={message:`CMS: update ${path} [${new Date().toISOString()}]`,content:encoded,branch:BRANCH};
+  if(sha[tab]) body.sha=sha[tab];
+  const r=await fetch(`${API}/${path}`,{method:'PUT',headers:{Authorization:`Bearer ${PAT}`,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.message||`HTTP ${r.status}`);}
+  const result=await r.json();
+  sha[tab]=result.content?.sha||sha[tab];
+  try{await fetch(`${PURGE}/${path}`,{method:'GET'});}catch(_){}
+}
+function openSettings(){document.getElementById('new-pat-input').value='';document.getElementById('settings-modal').classList.add('open');}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+async function updateToken(){
+  const t=document.getElementById('new-pat-input').value.trim();
+  if(!t){showToast('トークンを入力してください','error');return;}
+  setLoading(true,'トークンを確認中...');
+  try{
+    if(!await verifyToken(t)){showToast('トークンが無効です','error');return;}
+    PAT=t;localStorage.setItem('otm_pat',PAT);
+    document.getElementById('token-info').textContent='Token: '+PAT.slice(0,4)+'...'+PAT.slice(-4);
+    closeSettings();showToast('トークンを更新しました','success');
+  }catch(e){showToast('エラー: '+e.message,'error');}
+  finally{setLoading(false);}
+}
+async function manualPurge(){
+  setLoading(true,'キャッシュをクリア中...');
+  try{
+    await Promise.all(Object.values(FILES).map(f=>fetch(`${PURGE}/${f}`)));
+    showToast('キャッシュをクリアしました','success');
+  }catch(_){showToast('パージ完了（一部エラーあり）','info');}
+  finally{setLoading(false);}
+}
+function setLoading(on,msg='処理中...'){const el=document.getElementById('loading-overlay');el.classList.toggle('active',on);if(on)document.getElementById('loading-text').textContent=msg;}
+function setSavingState(on){document.getElementById('save-spinner').style.display=on?'inline-block':'none';document.getElementById('modal-save-btn').disabled=on;}
+function showToast(msg,type='info'){
+  const wrap=document.getElementById('toast-wrap');
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  const icon={success:'✓',error:'✗',info:'ℹ'}[type]||'';
+  el.innerHTML=`<span>${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(el);setTimeout(()=>el.remove(),4000);
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function today(){return new Date().toISOString().slice(0,10);}
+document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('settings-modal').addEventListener('click',function(e){if(e.target===this)closeSettings();});
+</script>
+</body>
+</html>
