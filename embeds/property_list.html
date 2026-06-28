@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>物件一覧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D1B2A;--navy-mid:#1B2D45;--steel:#415A77;
+  --gold:#C8A960;--gold-light:#D4BA7A;--warm-white:#FAF8F5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--warm-white);color:var(--navy);min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+.filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.filter-bar label{font-size:.8rem;font-weight:700;letter-spacing:.08em;color:var(--steel);text-transform:uppercase}
+.filter-select{appearance:none;background:white;border:1.5px solid #d0d6de;border-radius:6px;padding:8px 36px 8px 14px;font-family:'Noto Sans JP',sans-serif;font-size:.88rem;color:var(--navy);cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23415A77' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:border-color .2s}
+.filter-select:focus{outline:none;border-color:var(--gold)}
+.count-badge{margin-left:auto;font-size:.82rem;color:var(--steel);font-family:'Inter',sans-serif}
+.count-badge span{font-weight:600;color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);gap:18px}}
+@media(max-width:600px){.grid{grid-template-columns:1fr;gap:14px}}
+.card{background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(13,27,42,.07);transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(13,27,42,.13)}
+.card-thumb{height:180px;background:linear-gradient(135deg,var(--navy-mid) 0%,var(--steel) 100%);position:relative;overflow:hidden}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.card-badge{position:absolute;top:12px;left:12px;background:var(--gold);color:white;font-size:.7rem;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:3px;font-family:'Inter',sans-serif}
+.card-num{position:absolute;top:12px;right:12px;background:rgba(13,27,42,.6);color:rgba(255,255,255,.8);font-size:.68rem;font-family:'Inter',sans-serif;padding:2px 8px;border-radius:3px;letter-spacing:.04em}
+.card-body{padding:18px 18px 16px;flex:1;display:flex;flex-direction:column}
+.card-title{font-family:'Noto Serif JP',serif;font-size:1rem;font-weight:600;line-height:1.5;color:var(--navy);margin-bottom:10px;flex:1}
+.card-meta{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.card-meta-row{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--steel)}
+.card-price{font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:600;color:var(--gold);margin-bottom:14px;letter-spacing:.02em}
+.card-link{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--navy);text-decoration:none;border:1.5px solid var(--navy);border-radius:5px;padding:7px 14px;transition:background .18s,color .18s;align-self:flex-start;letter-spacing:.04em;cursor:pointer}
+.card-link:hover{background:var(--navy);color:white}
+.pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:40px}
+.page-btn{width:36px;height:36px;border-radius:6px;border:1.5px solid #d0d6de;background:white;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:500;color:var(--steel);cursor:pointer;transition:all .18s}
+.page-btn:hover{border-color:var(--gold);color:var(--gold)}
+.page-btn.active{background:var(--navy);border-color:var(--navy);color:white}
+.state-msg{text-align:center;padding:60px 20px;color:var(--steel);font-size:.95rem}
+.loader{width:36px;height:36px;border:3px solid #e0e4e8;border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="filter-bar">
+    <label>カテゴリ</label>
+    <select class="filter-select" id="catFilter">
+      <option value="">すべて</option>
+      <option value="事業用地">事業用地</option>
+      <option value="住宅用地">住宅用地</option>
+      <option value="売買物件">売買物件</option>
+    </select>
+    <div class="count-badge" id="countBadge"></div>
+  </div>
+  <div class="grid" id="grid">
+    <div class="state-msg" style="grid-column:1/-1"><div class="loader"></div>物件情報を読み込み中...</div>
+  </div>
+  <div class="pagination" id="pagination"></div>
+</div>
+<script>
+const DATA_URL='https://cdn.jsdelivr.net/gh/mocha-design/otm-contact-tabs@main/data/property_data.json';
+const SITE='https://tan669662.studio.site';
+const PER_PAGE=9;
+let allItems=[],filtered=[],currentPage=1;
+const grid=document.getElementById('grid');
+const catFilter=document.getElementById('catFilter');
+const countBadge=document.getElementById('countBadge');
+const paginationEl=document.getElementById('pagination');
+function navigate(url){window.top.location.href=url;}
+function renderCards(items){
+  if(!items.length){grid.innerHTML='<div class="state-msg" style="grid-column:1/-1">該当する物件が見つかりませんでした。</div>';return;}
+  grid.innerHTML=items.map(it=>{
+    const slug=it.slug||'';
+    const url=SITE+'/property-detail?slug='+encodeURIComponent(slug);
+    const cat=it.category||'物件';
+    const num=it.num||'';
+    const title=it.title||'物件名未設定';
+    const price=it.price||'';
+    const area=it.area||'';
+    const location=it.address||'';
+    return `<div class="card">
+  <div class="card-thumb">${it.image?`<img src="${esc(it.image)}" alt="${esc(title)}" loading="lazy">`:''}    <span class="card-badge">${esc(cat)}</span>
+    ${num?`<span class="card-num">No.${esc(num)}</span>`:''}
+  </div>
+  <div class="card-body">
+    <div class="card-title">${esc(title)}</div>
+    <div class="card-meta">
+      ${location?`<div class="card-meta-row"><span>${esc(location)}</span></div>`:''}
+      ${area?`<div class="card-meta-row"><span>${esc(area)}</span></div>`:''}
+    </div>
+    ${price?`<div class="card-price">${esc(price)}</div>`:''}
+    <a class="card-link" data-href="${esc(url)}" href="javascript:void(0)">詳しく見る →</a>
+  </div>
+</div>`;
+  }).join('');
+  grid.querySelectorAll('.card-link').forEach(a=>{
+    a.addEventListener('click',()=>navigate(a.dataset.href));
+  });
+}
+function renderPagination(total){
+  const pages=Math.ceil(total/PER_PAGE);
+  if(pages<=1){paginationEl.innerHTML='';return;}
+  let html='';
+  html+=`<button class="page-btn" ${currentPage===1?'disabled':''} data-page="${currentPage-1}">←</button>`;
+  for(let i=1;i<=pages;i++){html+=`<button class="page-btn${i===currentPage?' active':''}" data-page="${i}">${i}</button>`;}
+  html+=`<button class="page-btn" ${currentPage===pages?'disabled':''} data-page="${currentPage+1}">→</button>`;
+  paginationEl.innerHTML=html;
+  paginationEl.querySelectorAll('[data-page]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const p=parseInt(btn.dataset.page);
+      if(p<1||p>pages||p===currentPage) return;
+      currentPage=p;applyFilter();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+}
+function applyFilter(){
+  const cat=catFilter.value;
+  filtered=cat?allItems.filter(it=>it.category===cat):allItems.slice();
+  countBadge.innerHTML=`<span>${filtered.length}</span> 件`;
+  const start=(currentPage-1)*PER_PAGE;
+  renderCards(filtered.slice(start,start+PER_PAGE));
+  renderPagination(filtered.length);
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+catFilter.addEventListener('change',()=>{currentPage=1;applyFilter();});
+fetch(DATA_URL)
+  .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(data=>{
+    allItems=(data.items||[]).filter(it=>it.published!==false);
+    applyFilter();
+  })
+  .catch(err=>{
+    grid.innerHTML=`<div class="state-msg" style="grid-column:1/-1">データの取得に失敗しました。<br><small>${esc(err.message)}</small></div>`;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ニュース一覧</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0D1B2A;--navy-mid:#1B2D45;--steel:#415A77;--gold:#C8A960;--gold-light:#D4BA7A;--warm-white:#FAF8F5;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background-color:var(--warm-white);font-family:'Noto Sans JP',sans-serif;color:var(--navy);padding:80px 40px;}
+  .container{max-width:900px;margin:0 auto;}
+  .news-list{list-style:none;}
+  .news-item{border-bottom:1px solid rgba(65,90,119,.2);cursor:pointer;transition:background-color .2s ease;position:relative;}
+  .news-item:first-child{border-top:1px solid rgba(65,90,119,.2);}
+  .news-item:hover{background-color:rgba(200,169,96,.08);}
+  .news-item-inner{display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:start;padding:25px 16px;}
+  .news-meta{display:flex;flex-direction:column;gap:8px;padding-top:2px;}
+  .news-date{font-family:'Inter',sans-serif;font-size:13px;color:var(--steel);letter-spacing:.02em;white-space:nowrap;}
+  .news-category{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.04em;white-space:nowrap;}
+  .news-category.cat-info{background-color:var(--gold);color:var(--navy);}
+  .news-category.cat-land{background-color:var(--navy);color:#fff;}
+  .news-category.cat-default{background-color:var(--steel);color:#fff;}
+  .news-content{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .news-title{font-size:15px;font-weight:500;line-height:1.6;color:var(--navy);flex:1;}
+  .news-arrow{font-size:16px;color:var(--gold);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s;flex-shrink:0;}
+  .news-item:hover .news-arrow{opacity:1;transform:translateX(0);}
+  .empty-message{text-align:center;padding:80px 20px;color:var(--steel);font-size:15px;}
+  .loading{text-align:center;padding:80px 20px;color:var(--steel);font-size:14px;}
+  @media(max-width:640px){
+    body{padding:60px 20px;}
+    .news-item-inner{grid-template-columns:1fr;gap:10px;padding:20px 12px;}
+    .news-meta{flex-direction:row;align-items:center;gap:10px;}
+    .news-title{font-size:14px;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <ul class="news-list" id="newsList">
+    <li class="loading">読み込み中...</li>
+  </ul>
+</div>
+<script>
+  const DATA_URL='https://cdn.jsdelivr.net/gh/mocha-design/otm-contact-tabs@main/data/news_data.json';
+  const SITE_URL='https://tan669662.studio.site';
+  function formatDate(d){return d?d.replace(/-/g,'.');return '';}
+  function getCategoryClass(c){
+    if(!c) return 'cat-default';
+    if(c.includes('お知らせ')||c==='info') return 'cat-info';
+    if(c.includes('土地')||c==='land') return 'cat-land';
+    return 'cat-default';
+  }
+  function renderNews(items){
+    const list=document.getElementById('newsList');
+    const published=items.filter(item=>item.published!==false);
+    if(!published.length){list.innerHTML='<li class="empty-message">現在ニュースはありません</li>';return;}
+    list.innerHTML=published.map(item=>{
+      const catClass=getCategoryClass(item.category);
+      const dateStr=formatDate(item.date||'');
+      return `<li class="news-item" onclick="goToDetail('${item.slug||''}')">
+        <div class="news-item-inner">
+          <div class="news-meta">
+            <span class="news-date">${dateStr}</span>
+            <span class="news-category ${catClass}">${item.category||''}</span>
+          </div>
+          <div class="news-content">
+            <span class="news-title">${item.title||''}</span>
+            <span class="news-arrow">→</span>
+          </div>
+        </div>
+      </li>`;
+    }).join('');
+  }
+  function goToDetail(slug){
+    if(!slug) return;
+    window.open(`${SITE_URL}/news-detail?slug=${encodeURIComponent(slug)}`,'_top');
+  }
+  fetch(DATA_URL).then(r=>r.json()).then(data=>{
+    renderNews(data.items||[]);
+  }).catch(()=>{
+    document.getElementById('newsList').innerHTML='<li class="empty-message">データの読み込みに失敗しました</li>';
+  });
+</script>
+</body>
+</html>

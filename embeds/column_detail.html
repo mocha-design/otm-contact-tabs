@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>コラム詳細</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0D1B2A;--navy-mid:#1B2D45;--steel:#415A77;--gold:#C8A960;--gold-light:#D4BA7A;--warm-white:#FAF8F5;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background-color:var(--warm-white);font-family:'Noto Sans JP',sans-serif;color:var(--navy);}
+  .article-header{background-color:var(--navy);padding:60px 40px;}
+  .article-header-inner{max-width:900px;margin:0 auto;}
+  .header-meta{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+  .article-category{display:inline-block;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;background:var(--gold);color:var(--navy);letter-spacing:.06em;}
+  .article-date{font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,.6);}
+  .article-title{font-family:'Noto Serif JP',serif;font-size:32px;font-weight:600;line-height:1.5;color:#fff;}
+  .article-thumbnail{max-width:900px;margin:0 auto;padding:0 40px;}
+  .thumbnail-box{width:100%;height:280px;background:var(--navy-mid);display:flex;align-items:center;justify-content:center;margin-top:40px;border-radius:4px;overflow:hidden;}
+  .thumbnail-box img{width:100%;height:100%;object-fit:cover;}
+  .thumbnail-placeholder{color:rgba(255,255,255,.3);font-size:13px;}
+  .article-body-wrap{max-width:900px;margin:0 auto;padding:48px 40px 60px;}
+  .article-body p{font-size:15px;line-height:1.9;color:var(--navy);margin-bottom:1.5em;}
+  .article-body p:last-child{margin-bottom:0;}
+  .article-body strong{font-weight:700;font-size:16px;color:var(--navy-mid);display:block;margin-top:1.8em;margin-bottom:.6em;padding-left:12px;border-left:3px solid var(--gold);}
+  .related-section{background:#F2EFE9;padding:60px 40px;}
+  .related-inner{max-width:900px;margin:0 auto;}
+  .related-title{font-family:'Noto Serif JP',serif;font-size:20px;font-weight:600;color:var(--navy);margin-bottom:28px;padding-bottom:12px;border-bottom:1px solid rgba(65,90,119,.2);}
+  .related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .related-card{background:#fff;border-radius:6px;overflow:hidden;cursor:pointer;box-shadow:0 2px 6px rgba(13,27,42,.06);transition:transform .2s,box-shadow .2s;}
+  .related-card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(13,27,42,.1);}
+  .related-thumb{width:100%;height:120px;background:var(--navy-mid);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .related-thumb img{width:100%;height:100%;object-fit:cover;}
+  .related-body{padding:12px 14px 16px;}
+  .related-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--gold);color:var(--navy);margin-bottom:8px;}
+  .related-card-title{font-family:'Noto Serif JP',serif;font-size:13px;font-weight:600;line-height:1.55;color:var(--navy);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .article-footer{max-width:900px;margin:0 auto;padding:28px 40px 60px;}
+  .back-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--steel);text-decoration:none;transition:color .2s;}
+  .back-link:hover{color:var(--gold);}
+  .back-link::before{content:'←';font-size:16px;}
+  .loading{text-align:center;padding:80px 20px;color:var(--steel);font-size:14px;}
+  @media(max-width:768px){.related-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:640px){.article-header{padding:48px 20px;}.article-title{font-size:24px;}.article-thumbnail{padding:0 20px;}.thumbnail-box{height:200px;}.article-body-wrap{padding:40px 20px 48px;}.related-section{padding:48px 20px;}.related-grid{grid-template-columns:1fr;}.article-footer{padding:20px 20px 48px;}}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">読み込み中...</div></div>
+<script>
+  const DATA_URL='https://cdn.jsdelivr.net/gh/mocha-design/otm-contact-tabs@main/data/column_data.json';
+  const SITE_URL='https://tan669662.studio.site';
+  function formatDate(d){return d?d.replace(/-/g,'.'):''}
+  function getSlugFromReferrer(){
+    try{
+      const ref=document.referrer||'';
+      let m=ref.match(/\/column-detail\/([^/?#]+)/);
+      if(m) return decodeURIComponent(m[1]);
+      m=ref.match(/[?&]slug=([^&#]+)/);
+      if(m) return decodeURIComponent(m[1]);
+    }catch(e){}
+    return null;
+  }
+  function isHeading(line){return /^(【.+】|■|●|\d+\.|第\d+章)/.test(line.trim());}
+  function bodyToHtml(body){
+    if(!body) return '';
+    return body.split(/\n/).filter(l=>l.trim()).map(l=>isHeading(l.trim())?`<p><strong>${l.trim()}</strong></p>`:`<p>${l.trim()}</p>`).join('');
+  }
+  function renderRelated(allItems,currentSlug){
+    const others=allItems.filter(it=>it.slug!==currentSlug).slice(0,3);
+    if(!others.length) return '';
+    const cards=others.map(it=>`
+      <div class="related-card" onclick="goToDetail('${it.slug||''}')">
+        <div class="related-thumb">${it.thumbnail?`<img src="${it.thumbnail}" alt="" loading="lazy">`:'<span style="color:rgba(255,255,255,.2);font-size:10px">サムネイル</span>'}</div>
+        <div class="related-body">
+          <span class="related-badge">${it.category||''}</span>
+          <div class="related-card-title">${it.title||''}</div>
+        </div>
+      </div>`).join('');
+    return `<div class="related-section"><div class="related-inner"><div class="related-title">関連コラム</div><div class="related-grid">${cards}</div></div></div>`;
+  }
+  function renderArticle(item,allItems){
+    const thumbHtml=item.thumbnail?`<img src="${item.thumbnail}" alt="" loading="lazy">`:'<span class="thumbnail-placeholder">記事サムネイル</span>';
+    document.getElementById('app').innerHTML=`
+      <div class="article-header"><div class="article-header-inner">
+        <div class="header-meta">
+          <span class="article-category">${item.category||''}</span>
+          <span class="article-date">${formatDate(item.date||'')}</span>
+        </div>
+        <h1 class="article-title">${item.title||''}</h1>
+      </div></div>
+      <div class="article-thumbnail"><div class="thumbnail-box">${thumbHtml}</div></div>
+      <div class="article-body-wrap"><div class="article-body">${bodyToHtml(item.body||item.content||'')}</div></div>
+      ${renderRelated(allItems,item.slug)}
+      <div class="article-footer"><a class="back-link" href="${SITE_URL}/column" target="_top">コラム一覧に戻る</a></div>`;
+    if(item.title) document.title=item.title+' | コラム';
+  }
+  function goToDetail(slug){
+    if(!slug) return;
+    window.open(`${SITE_URL}/column-detail?slug=${encodeURIComponent(slug)}`,'_top');
+  }
+  fetch(DATA_URL).then(r=>r.json()).then(data=>{
+    const items=(data.items||[]);
+    if(!items.length){document.getElementById('app').innerHTML='<div class="loading">記事が見つかりませんでした</div>';return;}
+    const slug=getSlugFromReferrer();
+    const found=(slug&&items.find(it=>it.slug===slug))||items[0];
+    renderArticle(found,items);
+  }).catch(()=>{
+    document.getElementById('app').innerHTML='<div class="loading">データの読み込みに失敗しました</div>';
+  });
+</script>
+</body>
+</html>
