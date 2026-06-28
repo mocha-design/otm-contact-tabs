@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0D1B2A;--navy-mid:#1B2D45;--steel:#415A77;--gold:#C8A960;--gold-light:#D4BA7A;--gold-dark:#A88B3D;--warm-white:#FAF8F5;--warm-gray:#F2F0EC}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP','Inter',sans-serif;color:var(--navy);background:var(--warm-white);line-height:1.8;letter-spacing:.5px;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}.eng{font-family:'Inter',sans-serif}
+.section-label{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:5px;color:var(--gold);text-align:center;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.section-title{font-family:'Noto Serif JP',serif;font-size:34px;font-weight:700;text-align:center;letter-spacing:2px;margin-bottom:14px}
+.section-sub{font-size:13px;text-align:center;color:var(--steel);letter-spacing:1px;margin-bottom:64px}
+.contact-form-section{background:var(--warm-white);padding:100px 48px}
+.form-header{max-width:900px;margin:0 auto 60px;text-align:center}.form-header .section-sub{margin-bottom:0}
+.form-step-indicator{display:flex;justify-content:center;gap:40px;margin:0 auto 48px;max-width:600px}
+.step{position:relative;text-align:center}
+.step-number{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:12px;align-items:center;justify-content:center;margin-bottom:8px;font-family:'Inter',sans-serif}
+.step.active .step-number{background:var(--gold);color:var(--navy)}
+.step-label{font-size:11px;color:var(--steel);letter-spacing:.5px;font-weight:500}
+.phone-cta-bar{max-width:900px;margin:0 auto 48px;padding:24px 32px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;gap:24px}
+.phone-cta-bar-text{flex:1;font-size:13px;letter-spacing:.5px;color:rgba(255,255,255,.75)}
+.phone-cta-bar a{color:#fff;font-family:'Inter',sans-serif;font-size:18px;font-weight:700;letter-spacing:.5px;transition:color .3s}
+.phone-cta-bar a:hover{color:var(--gold-light)}
+.contact-form-wrap{max-width:720px;margin:0 auto}
+.form-group{margin-bottom:28px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;letter-spacing:.5px}
+.form-label .required{display:inline-block;padding:2px 8px;margin-left:8px;font-size:9px;font-weight:700;letter-spacing:.5px;background:var(--gold);color:var(--navy);border-radius:1px}
+.form-input,.form-select,.form-textarea{width:100%;padding:14px 18px;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--navy);background:#fff;border:1px solid rgba(13,27,42,.1);outline:none;transition:border-color .3s,box-shadow .3s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,96,.08)}
+.form-textarea{height:180px;resize:vertical}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23415A77' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;cursor:pointer}
+.form-note{font-size:12px;color:var(--steel);margin-top:6px}
+.form-two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.privacy-row{margin-bottom:20px;display:flex;align-items:center}.privacy-row input{margin-right:8px}
+.privacy-row label{font-size:11px;color:var(--steel);letter-spacing:.5px}.privacy-row a{color:var(--gold);text-decoration:underline;margin-left:4px}
+.form-submit{display:block;width:100%;max-width:320px;margin:48px auto 0;padding:18px;background:var(--gold);color:var(--navy);font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;border:none;transition:all .3s;cursor:pointer}
+.form-submit:hover{background:var(--gold-dark);color:#fff;transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,169,96,.2)}
+.form-submit[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}
+.form-privacy{text-align:center;margin-top:20px;font-size:11px;color:var(--steel)}
+.form-done{display:none;max-width:720px;margin:0 auto;text-align:center;padding:48px 24px}.form-done.show{display:block}
+.form-done .done-icon{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+.form-done .done-icon svg{width:30px;height:30px;stroke:var(--gold);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.form-done h3{font-family:'Noto Serif JP',serif;font-size:22px;margin-bottom:14px;letter-spacing:1px}.form-done p{font-size:13px;color:var(--steel);line-height:2}
+.contact-info{background:var(--navy);color:#fff;padding:100px 48px;position:relative;overflow:hidden}
+.contact-info::before{content:'';position:absolute;top:-200px;right:-200px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(200,169,96,.05)}
+.contact-info .section-title{color:#fff}.contact-info .section-sub{color:rgba(255,255,255,.4)}
+.info-grid{max-width:800px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;position:relative;z-index:1}
+.info-card{padding:40px;background:rgba(255,255,255,.03);border:1px solid rgba(200,169,96,.1);text-align:center;transition:all .3s}
+.info-card:hover{border-color:rgba(200,169,96,.25);background:rgba(200,169,96,.04)}
+.info-card .card-icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;margin:0 auto 20px;border:1.5px solid rgba(200,169,96,.35);background:rgba(200,169,96,.04)}
+.info-card .card-icon svg{width:24px;height:24px;stroke:var(--gold);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.info-card .card-label{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:3px;color:var(--gold);font-weight:600;margin-bottom:12px}
+.info-card .card-value{font-family:'Inter',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:.5px;margin-bottom:6px}
+.info-card .card-note{font-size:12px;color:rgba(255,255,255,.4)}
+@media(max-width:768px){.contact-form-section{padding:64px 20px}.contact-info{padding:64px 20px}.section-title{font-size:22px;letter-spacing:1px;margin-bottom:10px}.section-sub{font-size:12px;margin-bottom:40px}.phone-cta-bar{flex-direction:column;text-align:center;padding:20px}.phone-cta-bar a{font-size:16px}.form-two-col{grid-template-columns:1fr}.form-step-indicator{gap:24px}.form-input,.form-select,.form-textarea{padding:12px 14px;font-size:13px}.info-grid{grid-template-columns:1fr;gap:20px}.info-card{padding:28px 20px}.info-card .card-value{font-size:18px}}
+@media(max-width:430px){.section-title{font-size:20px}}
+</style>
+</head>
+<body>
+<section class="contact-form-section" id="contactForm">
+  <div class="form-header">
+    <div class="section-label eng">INQUIRY FORM</div>
+    <h2 class="section-title">お問い合わせフォーム</h2>
+    <div class="section-sub">ご不明な点やご相談があれば、お気軽にお問い合わせください</div>
+  </div>
+  <div class="form-step-indicator" id="stepInd">
+    <div class="step active"><div class="step-number">1</div><div class="step-label">内容入力</div></div>
+    <div class="step"><div class="step-number">2</div><div class="step-label">内容確認</div></div>
+    <div class="step"><div class="step-number">3</div><div class="step-label">送信完了</div></div>
+  </div>
+  <div class="phone-cta-bar">
+    <div class="phone-cta-bar-text">お急ぎの方はお電話でもお受けしています</div>
+    <a href="tel:028-653-0116">028-653-0116</a>
+  </div>
+  <form class="contact-form-wrap" id="cform" novalidate>
+    <div class="form-group">
+      <label class="form-label">お問い合わせ種別<span class="required eng">REQUIRED</span></label>
+      <select class="form-select" name="種別" required>
+        <option value="">ご相談内容をお選びください</option>
+        <option>施設建築について</option><option>不動産の売却について</option><option>不動産の購入について</option><option>不動産管理について</option><option>物件のお問い合わせ</option><option>その他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">物件番号</label>
+      <input type="text" class="form-input" name="物件番号" placeholder="例：TM-001（物件に関するお問い合わせの場合）">
+      <div class="form-note">物件情報ページに記載の番号をご入力ください</div>
+    </div>
+    <div class="form-two-col">
+      <div class="form-group"><label class="form-label">お名前<span class="required eng">REQUIRED</span></label><input type="text" class="form-input" name="お名前" required placeholder="例：山田 太郎"></div>
+      <div class="form-group"><label class="form-label">フリガナ<span class="required eng">REQUIRED</span></label><input type="text" class="form-input" name="フリガナ" required placeholder="例：ヤマダ タロウ"></div>
+    </div>
+    <div class="form-group"><label class="form-label">会社名</label><input type="text" class="form-input" name="会社名" placeholder="例：株式会社〇〇"></div>
+    <div class="form-group"><label class="form-label">メールアドレス<span class="required eng">REQUIRED</span></label><input type="email" class="form-input" name="メールアドレス" required placeholder="例：info@example.com"></div>
+    <div class="form-group"><label class="form-label">電話番号<span class="required eng">REQUIRED</span></label><input type="tel" class="form-input" name="電話番号" required placeholder="例：028-000-0000"></div>
+    <div class="form-group"><label class="form-label">お問い合わせ内容<span class="required eng">REQUIRED</span></label><textarea class="form-textarea" name="お問い合わせ内容" required placeholder="ご相談内容をご記入ください。お急ぎの場合はお電話もご利用ください。"></textarea></div>
+    <div class="privacy-row"><input type="checkbox" id="privacyCheck" required><label for="privacyCheck">個人情報保護方針に同意します<a href="/privacy">詳細はこちら</a></label></div>
+    <button type="submit" class="form-submit eng" id="subBtn">送信する →</button>
+    <div class="form-privacy">送信いただいた個人情報は、お問い合わせ対応のみに使用いたします。詳細は個人情報保護方針をご覧ください。</div>
+  </form>
+  <div class="form-done" id="formDone">
+    <div class="done-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h3>送信が完了しました</h3>
+    <p>お問い合わせいただきありがとうございます。<br>担当者より2営業日以内にご連絡いたします。<br>お急ぎの場合はお電話（028-653-0116）でもお受けしています。</p>
+  </div>
+</section>
+<section class="contact-info" id="contactInfo">
+  <div class="section-label eng">CONTACT INFO</div>
+  <h2 class="section-title">お電話・ご来社でのご相談</h2>
+  <div class="section-sub">お気軽にご連絡ください</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="card-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div class="card-label eng">PHONE</div><div class="card-value">028-653-0116</div><div class="card-note">受付時間 8:30〜17:30（水・日定休）</div></div>
+    <div class="info-card"><div class="card-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 6-9 13-9 13S3 16 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="card-label eng">OFFICE</div><div class="card-value" style="font-size:15px">栃木県宇都宮市西川田東町11-1</div><div class="card-note">JR東北本線 雀宮駅より車で約10分 / 駐車場あり</div></div>
+  </div>
+</section>
+<script>
+(function(){
+  var EP="https://script.google.com/macros/s/AKfycbz7gRqigHlkZ6Eeh0owwprI7vq0hYakT50euoGrv7QCoJGu8A5Y3ihW63DkJcD0wAMc/exec";
+  var f=document.getElementById('cform'); if(!f) return;
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var ok=true;
+    f.querySelectorAll('[required]').forEach(function(el){
+      var bad=(el.type==='checkbox')?!el.checked:!String(el.value).trim();
+      el.style.borderColor=bad?'#c0392b':'';
+      if(el.type==='checkbox'&&bad){el.parentElement.style.color='#c0392b';}
+      if(bad)ok=false;
+    });
+    if(!ok)return;
+    var btn=document.getElementById('subBtn'); btn.disabled=true; btn.textContent='送信中...';
+    var fd=new FormData(f);
+    var done=function(){
+      f.style.display='none';
+      document.getElementById('formDone').classList.add('show');
+      var steps=document.querySelectorAll('#stepInd .step');
+      steps.forEach(function(s){s.classList.remove('active');});
+      steps[2].classList.add('active');
+      document.getElementById('formDone').scrollIntoView({behavior:'smooth',block:'center'});
+    };
+    if(EP){
+      fetch(EP,{method:'POST',mode:'no-cors',body:fd}).then(done).catch(done);
+    } else { done(); }
+  });
+})();
+</script>
+</body>
+</html>
